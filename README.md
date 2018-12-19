@@ -16,3 +16,8 @@ sed ':a;N;$!ba;s/\n/,\n\x20\x20/g;s/\+//g;s/^/input =\n\x20\x20\[/;s/$/\]/' > /d
 ```bash
 sed -E ':a;N;$!ba;s/([[:lower:]])/\x27\1\x27,/g;s/,\n/\],\n\x20\x20\[/g;s/^/input =\n\x20\x20\[\[/;s/,$/\]\]/' > /dev/clipboard
 ```
+
+### Day3
+```bash
+sed -E ':a;N;$!ba;s/\n/,\n\x20\x20/g;s/\#[0-9]+\x20\x40\x20/\(\(/g;s/\:/\),/g;s/\x20([0-9]+)x([0-9]+)/\(\1,\2\)\)/g;s/^/input =\n\x20\x20\[/;s/$/\]/' > /dev/clipboard
+```

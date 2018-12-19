@@ -1,7 +1,7 @@
 module Day2 (day2) where
 
-import Data.List
-import Data.Ord
+import           Data.List
+import           Data.Ord
 
 
 day2 :: IO ()
