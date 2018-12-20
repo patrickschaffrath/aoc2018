@@ -2,30 +2,55 @@ module Day3
     (day3
     ) where
 
-import           Data.Map as Map (Map, alter, foldl, fromList)
+import           Data.List
+import           Data.Map   as Map (Map, alter, empty, foldl, lookup)
+import           Data.Maybe
 
 
 day3 :: IO ()
-day3 = print (solveA input)
+day3 = print (solveA input, solveB input)
 
 
 solveA :: [((Int, Int), (Int, Int))] -> Int
-solveA x = mapCoords (coords . ranges $ x) (fromList [])
+solveA = overlapCount . overlap'
 
 
-mapCoords :: [(Int, Int)] -> Map (Int, Int) Int -> Int
-mapCoords [] m    = Map.foldl fold 0 m
+solveB :: [((Int, Int), (Int, Int))] -> Int
+solveB x = wholeClaimIdx (claims x) (overlap' x)
+
+
+overlap' :: [((Int, Int), (Int, Int))] -> Map (Int, Int) Int
+overlap' x = overlap (claims x) empty
+
+
+wholeClaimIdx :: [[(Int, Int)]] -> Map (Int, Int) Int -> Int
+wholeClaimIdx xss m = (+1) $ fromJust $ findIndex lookupClaim xss
                       where
-                        fold acc x
-                                  | x > 1     = acc + 1
-                                  | otherwise = acc
-mapCoords (x:xs) m = mapCoords xs (alter inc x m)
-                      -- where inc @TODO
+                        lookupClaim xs = foldl' (\acc x -> acc + fromJust (Map.lookup x m)) 0 xs == length xs
 
 
-coords :: [([Int], [Int])] -> [(Int, Int)]
+overlapCount :: Map (Int, Int) Int -> Int
+overlapCount = Map.foldl fold 0
+                where
+                  fold acc x
+                            | x > 1     = acc + 1
+                            | otherwise = acc
+
+
+overlap :: [[(Int, Int)]] -> Map (Int, Int) Int -> Map (Int, Int) Int
+overlap [] m        = m
+overlap (xs:xss) m  = overlap xss (foldl' (flip (alter inc)) m xs)
+                        where inc Nothing  = Just 1
+                              inc (Just x) = Just $ x + 1
+
+
+claims :: [((Int, Int), (Int, Int))] -> [[(Int, Int)]]
+claims = coords . ranges
+
+
+coords :: [([Int], [Int])] -> [[(Int, Int)]]
 coords [] = []
-coords (x:xs) = uncurry coords' x ++ coords xs
+coords (x:xs) = uncurry coords' x : coords xs
                   where coords' _ []      = []
                         coords' xs (y:ys) = zip xs (repeat y) ++ coords' xs ys
 
